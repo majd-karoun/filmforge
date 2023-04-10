@@ -4,13 +4,97 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          background-color: #f0f0f0;
+      }
+      h1 {
+          color: #333;
+          text-align: center;
+          margin-top: 50px;
+      }
+      p {
+          font-size: 18px;
+          line-height: 1.5;
+          margin: 20px 0;
+          text-align: justify;
+      }
+      table {
+          border-collapse: collapse;
+          margin-top: 30px;
+          width: 100%;
+      }
+      th {
+          background-color: #333;
+          color: #fff;
+          font-weight: bold;
+          padding: 10px;
+          text-align: left;
+      }
+      td {
+          border: 1px solid #ccc;
+          padding: 10px;
+      }
+  </style>
     <title>Document</title>
 </head>
 <body>
     <h1>FilmForge API Documentation</h1>
     <p>Welcome to the FilmForge API documentation. This API allows you to access a vast collection of movie information and related data. With this API, you can retrieve information on movie titles, genres, ratings, and more.</p>
-    <h2>Getting Started</h2>
-    <p>To get started....</p>
-
+    <h2>Endpoints</h2>
+    <table>
+      <tr>
+        <th>URL</th>
+        <th>Method</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>/movies</td>
+        <td>GET</td>
+        <td>Get all movies</td>
+      </tr>
+      <tr>
+        <td>/movies/:title</td>
+        <td>GET</td>
+        <td>Get data about a single movie by title</td>
+      </tr>
+      <tr>
+        <td>/movies/genre/:genreName</td>
+        <td>GET</td>
+        <td>Return info about the genre of a movie</td>
+      </tr>
+      <tr>
+        <td>/movies/directors/:directorName</td>
+        <td>GET</td>
+        <td>Return info about the director of a movie</td>
+      </tr>
+      <tr>
+        <td>/users</td>
+        <td>POST</td>
+        <td>Create a new user</td>
+      </tr>
+      <tr>
+        <td>/users/:id</td>
+        <td>PUT</td>
+        <td>Update a user's name</td>
+      </tr>
+      <tr>
+        <td>/users/:id/:movieTitle</td>
+        <td>POST</td>
+        <td>add a movie to a user's favorites</td>
+      </tr>
+      <tr>
+        <td>/users/:id/:movieTitle</td>
+        <td>DELETE</td>
+        <td>remove a movie from user's favorites</td>
+      </tr>
+      <tr>
+        <td>/users/:id</td>
+        <td>DELETE</td>
+        <td>delete a user</td>
+      </tr>
+    </table>
+    
 </body>
 </html>
