@@ -2,115 +2,87 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const uuid = require("uuid");
+const mongoose = require("mongoose");
+const Models = require("./models.js");
+
+const Movies = Models.Movie;
+const Users = Models.User;
+const Director = Models.Director;
+const Genre = Models.Genre;
 
 app.use(express.json());
 app.use(morgan("common"));
 app.use(express.static("public"));
 
-let movies = [
-  {
-    title: "Inception",
-    description:
-      "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-    director: {
-      name: "Christopher Nolan",
-      bio: "Christopher Nolan is an English-American film director, producer, and screenwriter. He is best known for directing several highly acclaimed films, including Inception, The Dark Knight trilogy, and Dunkirk.",
-      birth: "July 30, 1970",
-    },
-    genre: {
-      name: "Sci-Fi",
-      description:
-        "A genre that typically deals with imaginative and futuristic concepts, such as advanced science and technology, space exploration, time travel, parallel universes, and extraterrestrial life.",
-    },
-  },
-  {
-    title: "Mad Max: Fury Road",
-    description:
-      "In a post-apocalyptic wasteland, a woman rebels against a tyrannical ruler in search for her homeland with the aid of a group of female prisoners, a psychotic worshiper, and a drifter named Max.",
-    director: {
-      name: "George Miller",
-      bio: "George Miller is an Australian film director, producer, and screenwriter. He is best known for directing several films in the Mad Max franchise, including Mad Max, Mad Max: Fury Road, and Mad Max: The Wasteland.",
-      birth: "March 3, 1945",
-    },
-    genre: {
-      name: "Action",
-      description:
-        "A genre that typically involves a protagonist who engages in physical or violent confrontations with antagonists, usually involving car chases, shootouts, explosions, and other high-energy scenes.",
-    },
-  },
-  {
-    title: "The Avengers",
-    description:
-      "Earth's mightiest heroes must come together and learn to fight as a team if they are to stop the mischievous Loki and his alien army from enslaving humanity.",
-    director: {
-      name: "Joss Whedon",
-      bio: "Joss Whedon is an American film and television writer, director, and producer. He is best known for creating several popular TV series, including Buffy the Vampire Slayer and Firefly, and for directing several films in the Marvel Cinematic Universe, including The Avengers and Avengers: Age of Ultron.",
-      birth: "June 23, 1964",
-    },
-    genre: {
-      name: "Action",
-      description:
-        "A genre that typically involves a protagonist who engages in physical or violent confrontations with antagonists, usually involving car chases, shootouts, explosions, and other high-energy scenes.",
-    },
-  },
-];
-
-let users = [
-  {
-    name: "John Doe",
-    id: 1,
-    favoriteMovies: [],
-  },
-  {
-    name: "Jane Smith",
-    id: 2,
-    favoriteMovies: [],
-  },
-  {
-    name: "Bob Johnson",
-    id: 3,
-    favoriteMovies: [],
-  },
-  {
-    name: "Emily Davis",
-    id: 4,
-    favoriteMovies: [],
-  },
-  {
-    name: "Mike Wilson",
-    id: 5,
-    favoriteMovies: [],
-  },
-];
+mongoose
+  .connect("mongodb://127.0.0.1:27017/cfDB", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("connected to db");
+  });
 
 // get all movies
-app.get("/movies", (req, res) => {
-  res.status(200).json(movies);
+app.get("/movies", async (req, res) => {
+  try {
+    const movies = await Movies.find()
+    res.status(200).json(movies)
+  } catch (error) {
+    console.error(error)
+    res.status(404).send('No movies found!')
+  }
 });
 
 //get data about a single movie by title
-app.get("/movies/:title", (req, res) => {
-  const { title } = req.params;
-  const movie = movies.find((movie) => movie.title === title);
+app.get("/movies/:title", async (req, res) => {
+ try {
+   const movie = await Movies.findOne({
+    title: req.params.title
+   })
+   if (!movie){
+    res.status(404).send('Movie not found!')
+   }else{
+    res.status(200).json(movie)
+   }
+ } catch (error) {
+  console.error(error)
+  res.status(500).send(error)
+ }
+});
 
-  if (movie) {
-    res.status(200).json(movie);
-  } else {
-    res.status(404).send("Movie not found");
+
+// return data about a genre by name/title
+app.get("/genres/:genreName", async (req, res) => {
+  try {
+    const genre = await Genre.findOne({ name: req.params.genreName });
+    if (!genre) {
+      res.status(404).send("Genre not found!");
+    } else {
+      res.status(200).json(genre);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error: " + error);
   }
 });
 
-//return info about the genre of a movie
-app.get("/movies/genre/:genreName", (req, res) => {
-  const { genreName } = req.params;
-  const genre = movies.find((movie) => movie.genre.name === genreName).genre;
+// return data about director by name 
+app.get('/directors/:directorName', async (req,res) =>{
+  try {
+    const director = await Director.find({name: req.params.directorName})
 
-  if (genre) {
-    res.status(200).json(genre);
-  } else {
-    res.status(404).send("Genre not found");
+    if(!director){
+      res.status(404).send("Director not found!")
+    }else{
+      res.status(200).json(director)
+    }
+  } catch (error) {
+    console.error(error)
+    res.status(500).send("Error: " + error)
   }
-});
+})
+
 
 //return info about the genre of a movie
 app.get("/movies/directors/:directorName", (req, res) => {
@@ -126,79 +98,122 @@ app.get("/movies/directors/:directorName", (req, res) => {
   }
 });
 
+//get all users
+app.get("/users", (req, res) => {
+  Users.find()
+    .then((users) => {
+      res.status(201).json(users);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send("Error: " + err);
+    });
+});
+
 //create a new user
-app.post("/users", (req, res) => {
-  const newUser = req.body;
+app.post("/users", async (req, res) => {
+  try {
+    const user = await Users.findOne({ Name: req.body.name });
+    if (user) {
+      return res.status(400).send(req.body.Name + " already exists");
+    }
 
-  if (newUser.name) {
-    newUser.id = uuid.v4();
-    users.push(newUser);
+    const newUser = await Users.create({
+      name: req.body.name,
+      password: req.body.password,
+      email: req.body.email,
+      birthday: req.body.birthday,
+    });
+
     res.status(201).json(newUser);
-  } else {
-    res.status(400).send("users need names");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error: " + error);
   }
 });
 
-// update a users name
-app.put("/users/:id", (req, res) => {
-  const { id } = req.params;
-  const updatedUser = req.body;
 
-  let user = users.find((user) => user.id == id);
-
-  if (user) {
-    user.name = updatedUser.name;
-    res.status(200).json(user);
-  } else {
-    res.status(400).send("user not find");
+//get a user by Name
+app.get("/users/:Name", async (req, res, next) => {
+  try {
+    const user = await Users.findOne({ Name: req.params.Name });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error: " + error);
   }
 });
 
-//add a movie to a user's favorites
-app.post("/users/:id/:movieTitle", (req, res) => {
-  const { id, movieTitle } = req.params;
+// update a user's info, by Name
+app.put("/users/:name", async (req, res) => {
+  try {
+    const updatedUser = await Users.findOneAndUpdate(
+      { name: req.params.name },
+      {
+        $set: {
+          name: req.body.name,
+          password: req.body.password,
+          email: req.body.email,
+          birthday: req.body.birthday
+        },
+      },
+      { new: true } // This line makes sure that the updated document is returned
+    );
 
-  let user = users.find((user) => user.id == id);
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error: " + error);
+  }
+});
 
-  if (user) {
-    user.favoriteMovies.push(movieTitle);
-    res
-      .status(200)
-      .send(`${movieTitle} has been added to user:${id} favorites`);
-  } else {
-    res.status(400).send("user not find");
+//add a movie to a user's list of favorites
+app.post("/users/:name/movies/:movieId", async (req, res) => {
+  try {
+    const updatedUser = await Users.findOneAndUpdate(
+      { name: req.params.name },
+      { $addToSet: { favoriteMovies: req.params.movieId } },
+      { new: true }
+    );
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error: " + error);
   }
 });
 
 //remove a movie from user's favorites
-app.delete("/users/:id/:movieTitle", (req, res) => {
-  const { id, movieTitle } = req.params;
-
-  let user = users.find((user) => user.id == id);
-
-  if (user) {
-    user.favoriteMovies = user.favoriteMovies.filter(
-      (title) => title !== movieTitle
+app.delete("/users/:name/movies/:movieId", async (req, res) => {
+  try {
+    const updatedUser = await Users.findOneAndUpdate(
+      { name: req.params.name },
+      { $pull: { favoriteMovies: req.params.movieId } },
+      { new: true }
     );
-    res
-      .status(200)
-      .send(`${movieTitle} has been removed from user:${id} favorites`);
-  } else {
-    res.status(400).send("user not find");
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error);
   }
 });
 
 //delete a user
-app.delete("/users/:id/", (req, res) => {
-  const { id } = req.params;
-
-  let user = users.find((user) => user.id == id);
-
-  if (user) {
-    users = users.filter((user) => user.id != id);
-    res.status(200).send(`user:${id} has been deleted`);
-  } else {
-    res.status(400).send("user not find");
+app.delete("/users/:name", async (req, res) => {
+  try {
+    const userToDelete = await Users.findOneAndDelete({
+      name: req.params.name,
+    });
+    if (!userToDelete) {
+      res.status(400).send(`user ${req.params.name} was not found`);
+    } else {
+      res.status(200).json(userToDelete);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error: " + error);
   }
 });
 
