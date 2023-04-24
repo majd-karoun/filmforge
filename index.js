@@ -98,17 +98,7 @@ app.get("/movies/directors/:directorName", (req, res) => {
   }
 });
 
-//get all users
-app.get("/users", (req, res) => {
-  Users.find()
-    .then((users) => {
-      res.status(201).json(users);
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+
 
 //create a new user
 app.post("/users", async (req, res) => {
@@ -133,19 +123,6 @@ app.post("/users", async (req, res) => {
 });
 
 
-//get a user by Name
-app.get("/users/:Name", async (req, res, next) => {
-  try {
-    const user = await Users.findOne({ Name: req.params.Name });
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send("Error: " + error);
-  }
-});
 
 // update a user's info, by Name
 app.put("/users/:name", async (req, res) => {

@@ -40,61 +40,60 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>FilmForge API Documentation</h1>
-    <p>Welcome to the FilmForge API documentation. This API allows you to access a vast collection of movie information and related data. With this API, you can retrieve information on movie titles, genres, ratings, and more.</p>
-    <h2>Endpoints</h2>
-    <table>
-      <tr>
-        <th>URL</th>
-        <th>Method</th>
-        <th>Description</th>
-      </tr>
-      <tr>
-        <td>/movies</td>
-        <td>GET</td>
-        <td>Get all movies</td>
-      </tr>
-      <tr>
-        <td>/movies/:title</td>
-        <td>GET</td>
-        <td>Get data about a single movie by title</td>
-      </tr>
-      <tr>
-        <td>/movies/genre/:genreName</td>
-        <td>GET</td>
-        <td>Return info about the genre of a movie</td>
-      </tr>
-      <tr>
-        <td>/movies/directors/:directorName</td>
-        <td>GET</td>
-        <td>Return info about the director of a movie</td>
-      </tr>
-      <tr>
-        <td>/users</td>
-        <td>POST</td>
-        <td>Create a new user</td>
-      </tr>
-      <tr>
-        <td>/users/:id</td>
-        <td>PUT</td>
-        <td>Update a user's name</td>
-      </tr>
-      <tr>
-        <td>/users/:id/:movieTitle</td>
-        <td>POST</td>
-        <td>add a movie to a user's favorites</td>
-      </tr>
-      <tr>
-        <td>/users/:id/:movieTitle</td>
-        <td>DELETE</td>
-        <td>remove a movie from user's favorites</td>
-      </tr>
-      <tr>
-        <td>/users/:id</td>
-        <td>DELETE</td>
-        <td>delete a user</td>
-      </tr>
-    </table>
-    
+  <h1>FilmForge API Documentation</h1>
+  <p>Welcome to the FilmForge API documentation. This API allows you to access a vast collection of movie information and related data. With this API, you can retrieve information on movie titles, genres, ratings, and more.</p>
+  <h2>Endpoints</h2>
+  <table>
+    <tr>
+      <th>URL</th>
+      <th>Method</th>
+      <th>Description</th>
+    </tr>
+    <tr>
+      <td>/movies</td>
+      <td>GET</td>
+      <td>Get all movies</td>
+    </tr>
+    <tr>
+      <td>/movies/:title</td>
+      <td>GET</td>
+      <td>Get data about a single movie by title</td>
+    </tr>
+    <tr>
+      <td>/genres/:genreName</td>
+      <td>GET</td>
+      <td>Return info about the genre of a movie</td>
+    </tr>
+    <tr>
+      <td>/directors/:directorName</td>
+      <td>GET</td>
+      <td>Return info about the director of a movie</td>
+    </tr>
+    <tr>
+      <td>/users</td>
+      <td>POST</td>
+      <td>Create a new user</td>
+    </tr>
+    <tr>
+      <td>/users/:name</td>
+      <td>PUT</td>
+      <td>Update a user's info (username, password, email, date of birth) by name</td>
+    </tr>
+    <tr>
+      <td>/users/:name/movies/:movieId</td>
+      <td>POST</td>
+      <td>Add a movie to a user's list of favorites</td>
+    </tr>
+    <tr>
+      <td>/users/:name/movies/:movieId</td>
+      <td>DELETE</td>
+      <td>Remove a movie from user's favorites</td>
+    </tr>
+    <tr>
+      <td>/users/:name</td>
+      <td>DELETE</td>
+      <td>Delete a user</td>
+    </tr>
+  </table>
 </body>
 </html>
