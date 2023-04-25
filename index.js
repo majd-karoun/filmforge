@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const uuid = require("uuid");
+const bodyParser = require("body-parser")
 const mongoose = require("mongoose");
 const Models = require("./models.js");
 
@@ -10,9 +11,16 @@ const Users = Models.User;
 const Director = Models.Director;
 const Genre = Models.Genre;
 
-app.use(express.json());
+
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: false })); 
 app.use(morgan("common"));
 app.use(express.static("public"));
+
+
+let auth = require('./auth')(app);
+const passport = require('passport');
+require('./passport');
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/cfDB", {
@@ -24,7 +32,7 @@ mongoose
   });
 
 // get all movies
-app.get("/movies", async (req, res) => {
+app.get("/movies",passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const movies = await Movies.find()
     res.status(200).json(movies)
@@ -35,7 +43,7 @@ app.get("/movies", async (req, res) => {
 });
 
 //get data about a single movie by title
-app.get("/movies/:title", async (req, res) => {
+app.get("/movies/:title",passport.authenticate('jwt', { session: false }), async (req, res) => {
  try {
    const movie = await Movies.findOne({
     title: req.params.title
@@ -52,10 +60,10 @@ app.get("/movies/:title", async (req, res) => {
 });
 
 
-// return data about a genre by name/title
-app.get("/genres/:genreName", async (req, res) => {
+// return data about a genre by /title
+app.get("/genres/:genre",passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
-    const genre = await Genre.findOne({ name: req.params.genreName });
+    const genre = await Genre.findOne({ name: req.params.genre });
     if (!genre) {
       res.status(404).send("Genre not found!");
     } else {
@@ -67,10 +75,10 @@ app.get("/genres/:genreName", async (req, res) => {
   }
 });
 
-// return data about director by name 
-app.get('/directors/:directorName', async (req,res) =>{
+// return data about director by  
+app.get('/directors/:director',passport.authenticate('jwt', { session: false }), async (req,res) =>{
   try {
-    const director = await Director.find({name: req.params.directorName})
+    const director = await Director.find({name: req.params.director})
 
     if(!director){
       res.status(404).send("Director not found!")
@@ -84,33 +92,20 @@ app.get('/directors/:directorName', async (req,res) =>{
 })
 
 
-//return info about the genre of a movie
-app.get("/movies/directors/:directorName", (req, res) => {
-  const { directorName } = req.params;
-  const director = movies.find(
-    (movie) => movie.director.name === directorName
-  ).director;
-
-  if (director) {
-    res.status(200).json(director);
-  } else {
-    res.status(404).send("Genre not found");
-  }
-});
 
 
 
 //create a new user
 app.post("/users", async (req, res) => {
   try {
-    const user = await Users.findOne({ Name: req.body.name });
+    const user = await Users.findOne({ Username: req.body.Username });
     if (user) {
-      return res.status(400).send(req.body.Name + " already exists");
+      return res.status(400).send(req.body.Username + " already exists");
     }
 
     const newUser = await Users.create({
-      name: req.body.name,
-      password: req.body.password,
+      Username: req.body.Username,
+      Password: req.body.Password,
       email: req.body.email,
       birthday: req.body.birthday,
     });
@@ -124,15 +119,15 @@ app.post("/users", async (req, res) => {
 
 
 
-// update a user's info, by Name
-app.put("/users/:name", async (req, res) => {
+// update a user's info, by name 
+app.put("/users/:Username",passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const updatedUser = await Users.findOneAndUpdate(
-      { name: req.params.name },
+      { Username: req.params.Username },
       {
         $set: {
-          name: req.body.name,
-          password: req.body.password,
+         Username: req.body.Username,
+          Password: req.body.Password,
           email: req.body.email,
           birthday: req.body.birthday
         },
@@ -148,10 +143,10 @@ app.put("/users/:name", async (req, res) => {
 });
 
 //add a movie to a user's list of favorites
-app.post("/users/:name/movies/:movieId", async (req, res) => {
+app.post("/users/:/movies/:movieId",passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const updatedUser = await Users.findOneAndUpdate(
-      { name: req.params.name },
+      { Username: req.params.Username },
       { $addToSet: { favoriteMovies: req.params.movieId } },
       { new: true }
     );
@@ -163,10 +158,10 @@ app.post("/users/:name/movies/:movieId", async (req, res) => {
 });
 
 //remove a movie from user's favorites
-app.delete("/users/:name/movies/:movieId", async (req, res) => {
+app.delete("/users/:/movies/:movieId",passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const updatedUser = await Users.findOneAndUpdate(
-      { name: req.params.name },
+      { Username: req.params.Username },
       { $pull: { favoriteMovies: req.params.movieId } },
       { new: true }
     );
@@ -178,13 +173,13 @@ app.delete("/users/:name/movies/:movieId", async (req, res) => {
 });
 
 //delete a user
-app.delete("/users/:name", async (req, res) => {
+app.delete("/users/:Username",passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const userToDelete = await Users.findOneAndDelete({
-      name: req.params.name,
+      Username: req.params.Username,
     });
     if (!userToDelete) {
-      res.status(400).send(`user ${req.params.name} was not found`);
+      res.status(400).send(`user ${req.params.Username} was not found`);
     } else {
       res.status(200).json(userToDelete);
     }
