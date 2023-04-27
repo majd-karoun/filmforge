@@ -5,17 +5,30 @@ const uuid = require("uuid");
 const bodyParser = require("body-parser")
 const mongoose = require("mongoose");
 const Models = require("./models.js");
+const cors = require('cors')
+const {check, validationResult} = require('express-validator');
 
 const Movies = Models.Movie;
 const Users = Models.User;
 const Director = Models.Director;
 const Genre = Models.Genre;
 
+let allowedOrigins = ['http://localhost:8080'];
 
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: false })); 
 app.use(morgan("common"));
 app.use(express.static("public"));
+app.use(cors({
+  origin: (origin, callback) => {
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){ // If a specific origin isn’t found on the list of allowed origins
+      let message = 'The CORS policy for this application doesn’t allow access from origin ' + origin;
+      return callback(new Error(message ), false);
+    }
+    return callback(null, true);
+  }
+}))
 
 
 let auth = require('./auth')(app);
@@ -96,7 +109,19 @@ app.get('/directors/:director',passport.authenticate('jwt', { session: false }),
 
 
 //create a new user
-app.post("/users", async (req, res) => {
+app.post("/users",[
+  check('Username', 'Username is required').isLength({min: 5}),
+  check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+  check('Password', 'Password is required').not().isEmpty(),
+  check('Email', 'Email does not appear to be valid').isEmail()
+], async (req, res) => {
+  // check the validation object for errors
+  let errors = validationResult(req);
+  if (!errors.isEmpty()){
+    return res.status(422).json({errors: errors.array()});
+  }
+
+  let hashedPassword = Users.hashPassword(req.body.Password);
   try {
     const user = await Users.findOne({ Username: req.body.Username });
     if (user) {
@@ -105,9 +130,8 @@ app.post("/users", async (req, res) => {
 
     const newUser = await Users.create({
       Username: req.body.Username,
-      Password: req.body.Password,
-      email: req.body.email,
-      birthday: req.body.birthday,
+      Password: hashedPassword,
+      Email: req.body.Email
     });
 
     res.status(201).json(newUser);
@@ -120,7 +144,12 @@ app.post("/users", async (req, res) => {
 
 
 // update a user's info, by name 
-app.put("/users/:Username",passport.authenticate('jwt', { session: false }), async (req, res) => {
+app.put("/users/:Username",passport.authenticate('jwt', { session: false }),[
+  check('Username', 'Username is required').isLength({min: 5}),
+  check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+  check('Password', 'Password is required').not().isEmpty(),
+  check('Email', 'Email does not appear to be valid').isEmail()
+], async (req, res) => {
   try {
     const updatedUser = await Users.findOneAndUpdate(
       { Username: req.params.Username },
@@ -128,8 +157,7 @@ app.put("/users/:Username",passport.authenticate('jwt', { session: false }), asy
         $set: {
          Username: req.body.Username,
           Password: req.body.Password,
-          email: req.body.email,
-          birthday: req.body.birthday
+          Email: req.body.Email
         },
       },
       { new: true } // This line makes sure that the updated document is returned
@@ -194,6 +222,7 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke!");
 });
 
-app.listen(8080, () => {
-  console.log("Your app is listening on port 8080.");
+const port = process.env.PORT || 8080;
+app.listen(port, '0.0.0.0',() => {
+ console.log('Listening on Port ' + port);
 });
