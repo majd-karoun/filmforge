@@ -13,7 +13,7 @@ const Users = Models.User;
 const Director = Models.Director;
 const Genre = Models.Genre;
 
-let allowedOrigins = ['http://localhost:8080'];
+let allowedOrigins = ['https://filmforge.herokuapp.com/'];
 
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: false })); 
@@ -36,13 +36,17 @@ const passport = require('passport');
 require('./passport');
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/cfDB", {
+  .connect(process.env.CONNECTION_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
   .then(() => {
     console.log("connected to db");
   });
+
+app.get("/", (req,res) => {
+  res.send('Welcome to FilmForge')
+})
 
 // get all movies
 app.get("/movies",passport.authenticate('jwt', { session: false }), async (req, res) => {
@@ -222,7 +226,8 @@ app.use((err, req, res, next) => {
   res.status(500).send("Something broke!");
 });
 
-const port = process.env.PORT || 8080;
-app.listen(port, '0.0.0.0',() => {
- console.log('Listening on Port ' + port);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0',() => {
+ console.log('Listening on port ' + PORT);
 });
+
