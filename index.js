@@ -49,7 +49,7 @@ app.get("/", (req,res) => {
 })
 
 // get all movies
-app.get("/movies",passport.authenticate('jwt', { session: false }), async (req, res) => {
+app.get("/movies", async (req, res) => {
   try {
     const movies = await Movies.find()
     res.status(200).json(movies)
