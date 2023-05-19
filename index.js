@@ -14,13 +14,8 @@ const Director = Models.Director;
 const Genre = Models.Genre;
 
 
-let allowedOrigins = ['https://filmforge.herokuapp.com/',"http://localhost:1234"];
+let allowedOrigins = ['https://filmforge.herokuapp.com',"http://localhost:1234"];
 
-
-app.use(bodyParser.json()); 
-app.use(bodyParser.urlencoded({ extended: false })); 
-app.use(morgan("common"));
-app.use(express.static("public"));
 app.use(cors({
   origin: (origin, callback) => {
     if(!origin) return callback(null, true);
@@ -31,6 +26,11 @@ app.use(cors({
     return callback(null, true);
   }
 }))
+app.use(bodyParser.json()); 
+app.use(bodyParser.urlencoded({ extended: false })); 
+app.use(morgan("common"));
+app.use(express.static("public"));
+
 
 
 let auth = require('./auth')(app);
