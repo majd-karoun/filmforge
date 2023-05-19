@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 });
 
 // get all movies
-app.get("/movies", async (req, res) => {
+app.get("/movies",  passport.authenticate("jwt", { session: false }),async (req, res) => {
   try {
     const movies = await Movies.find({}).populate("director").populate("genre");
     res.status(200).json(movies);
