@@ -13,7 +13,7 @@ const Users = Models.User;
 const Director = Models.Director;
 const Genre = Models.Genre;
 
-let allowedOrigins = ['https://filmforge.herokuapp.com/'];
+let allowedOrigins = ['https://filmforge.herokuapp.com/','http://localhost:1234'];
 
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: false })); 
