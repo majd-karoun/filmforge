@@ -123,7 +123,27 @@ app.get(
       res.status(500).send("Error: " + error);
     }
   }
+
 );
+
+
+
+// Get a single user by username
+app.get("/users/:Username", passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const user = await Users.findOne({ Username: req.params.Username });
+    if (!user) {
+      res.status(404).send("User not found!");
+    } else {
+      res.status(200).json(user);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error: " + error);
+  }
+});
+
+
 
 //create a new user
 app.post(
