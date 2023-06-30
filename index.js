@@ -223,18 +223,33 @@ app.put(
   }
 );
 
-//add a movie to a user's list of favorites
+
+// Add a movie to a user's list of favorites
 app.post(
-  "/users/:/movies/:movieId",
+  "/users/:Username/movies/:movieId",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      const updatedUser = await Users.findOneAndUpdate(
-        { Username: req.params.Username },
-        { $addToSet: { favoriteMovies: req.params.movieId } },
-        { new: true }
-      );
-      res.json(updatedUser);
+      const user = await Users.findOne({ Username: req.params.Username });
+      if (!user) {
+        return res.status(400).send(`User ${req.params.Username} was not found`);
+      }
+
+      const movie = await Movies.findOne({ _id: req.params.movieId });
+      if (!movie) {
+        return res.status(400).send(`Movie with id ${req.params.movieId} was not found`);
+      }
+
+      // Check if the movie is already in the user's list of favorites
+      if (user.favoriteMovies.includes(movie._id)) {
+        return res.status(400).send("Movie is already in the user's list of favorites");
+      }
+
+      // Add the movie to the user's list of favorites
+      user.favoriteMovies.push(movie._id);
+      await user.save();
+      
+      res.status(200).send(`Movie with id ${req.params.movieId} was added to the list of favorites of user ${req.params.Username}`);
     } catch (error) {
       console.error(error);
       res.status(500).send("Error: " + error);
