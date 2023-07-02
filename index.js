@@ -42,7 +42,7 @@ const passport = require("passport");
 require("./passport");
 
 mongoose
-  .connect(process.env.CONNECTION_URI, {
+  .connect("mongodb+srv://karoun:mK%407.wrlwro@cluster0.8taly.mongodb.net/FilmForgeDB", {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -65,15 +65,13 @@ app.get("/movies",  passport.authenticate("jwt", { session: false }),async (req,
   }
 });
 
-//get data about a single movie by title
+// get data about a single movie by id
 app.get(
-  "/movies/:title",
+  "/movies/:id",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      const movie = await Movies.findOne({
-        title: req.params.title,
-      });
+      const movie = await Movies.findById(req.params.id);
       if (!movie) {
         res.status(404).send("Movie not found!");
       } else {
@@ -131,7 +129,7 @@ app.get(
 // Get a single user by username
 app.get("/users/:Username", passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
-    const user = await Users.findOne({ Username: req.params.Username });
+    const user = await Users.findOne({ Username: req.params.Username }).populate('favoriteMovies');
     if (!user) {
       res.status(404).send("User not found!");
     } else {
