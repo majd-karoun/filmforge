@@ -15,7 +15,7 @@ const Genre = Models.Genre;
 
 let allowedOrigins = [
   "https://filmforge.herokuapp.com",
-  "http://localhost:1234",
+  "https://filmforgeapp.netlify.app",
 ];
 
 app.use(
@@ -42,7 +42,7 @@ const passport = require("passport");
 require("./passport");
 
 mongoose
-  .connect("mongodb+srv://karoun:mK%407.wrlwro@cluster0.8taly.mongodb.net/FilmForgeDB", {
+  .connect(process.env.CONNECTION_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
