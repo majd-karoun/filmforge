@@ -16,6 +16,7 @@ const Genre = Models.Genre;
 let allowedOrigins = [
   "https://filmforge.herokuapp.com",
   "https://filmforgeapp.netlify.app",
+  "http://localhost:1234"
 ];
 
 app.use(
